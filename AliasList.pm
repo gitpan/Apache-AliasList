@@ -97,7 +97,7 @@ use warnings;
 use Apache::Constants qw(:common REDIRECT);
 use File::stat;
 
-our $VERSION     = '0.06';
+our $VERSION     = '0.07';
 our $list_mtime  = 0;
 our @aliaslist   = ();
 our %forward_map = ();
@@ -114,9 +114,9 @@ sub handler {
 
 sub PerlTransHandler {
   my $r     = shift;
-  return OK unless $r->is_initial_req;
+  return DECLINED unless ($r->is_initial_req);
   
-  (my $uri  = $r->uri) =~ s!([^/]+)/+$!$1!;
+  (my $uri  = $r->uri) =~ s!^/+$!/!;
   
   # Reload the alias.list file if it has been modified since the last reload
   my $aliasfile = $r->dir_config('AliasList') or return DECLINED;
@@ -130,7 +130,8 @@ sub PerlTransHandler {
   
   if ($forward_map{$uri}) {
     $uri = $forward_map{$uri};
-    # Send a Redirect message if the new URI is a full (http://...) address
+    # Send a Redirect message if the new URI is a full (http://...)
+    # address, otherwise just change the URI to redirect internally
     if ($uri =~ m!^[a-zA-Z]+://!) {
       $r->content_type('text/html');
       $r->header_out(Location => $uri);
