@@ -1,6 +1,6 @@
 #! /usr/bin/perl 
 
-=head1 TITLE
+=head1 NAME
 
 Apache::AliasList - Apache translation handler to process lists of aliases
 
@@ -97,7 +97,7 @@ use warnings;
 use Apache::Constants qw(:common REDIRECT);
 use File::stat;
 
-our $VERSION     = '0.07';
+our $VERSION     = '0.08';
 our $list_mtime  = 0;
 our @aliaslist   = ();
 our %forward_map = ();
@@ -116,7 +116,7 @@ sub PerlTransHandler {
   my $r     = shift;
   return DECLINED unless ($r->is_initial_req);
   
-  (my $uri  = $r->uri) =~ s!^/+$!/!;
+  (my $uri  = $r->uri) =~ s!([^/]+)/+$!$1!;
   
   # Reload the alias.list file if it has been modified since the last reload
   my $aliasfile = $r->dir_config('AliasList') or return DECLINED;
